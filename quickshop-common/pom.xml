@@ -136,31 +136,31 @@
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-api</artifactId>
             <scope>compile</scope>
-            <version>4.3.3-SNAPSHOT</version>
+            <version>4.3.4</version>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bukkit</artifactId>
             <scope>compile</scope>
-            <version>4.3.3-SNAPSHOT</version>
+            <version>4.3.4</version>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-facet</artifactId>
             <scope>compile</scope>
-            <version>4.3.3-SNAPSHOT</version>
+            <version>4.3.4</version>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-viaversion</artifactId>
             <scope>compile</scope>
-            <version>4.3.3-SNAPSHOT</version>
+            <version>4.3.4</version>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-serializer-bungeecord</artifactId>
             <scope>compile</scope>
-            <version>4.3.3-SNAPSHOT</version>
+            <version>4.3.4</version>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
