@@ -498,7 +498,7 @@ public class QuickShop implements QuickShopAPI, Reloadable {
         // Load quick variables
         this.display = this.getConfig().getBoolean("shop.display-items");
         final int type = getConfig().getInt("shop.display-type");
-        if(type != 2 && type != 900) {
+        if (type != 2 && type != 900) {
             this.display = false;
         }
 
@@ -557,7 +557,7 @@ public class QuickShop implements QuickShopAPI, Reloadable {
     public GameVersion getGameVersion() {
         if (gameVersion == null) {
             gameVersion = GameVersion.get(ReflectFactory.getNMSVersion());
-            if(gameVersion == GameVersion.UNKNOWN) {
+            if (gameVersion == GameVersion.UNKNOWN) {
                 gameVersion = GameVersion.get(platform.getMinecraftVersion());
             }
         }
@@ -663,9 +663,9 @@ public class QuickShop implements QuickShopAPI, Reloadable {
 
         this.folia = new FoliaLib(javaPlugin);
 
-        if(this.folia.isFolia()) {
+        if (this.folia.isFolia()) {
             this.menuHandler = new FoliaMenuHandler(javaPlugin, true);
-        } else if(this.folia.isPaper()) {
+        } else if (this.folia.isPaper()) {
             this.menuHandler = new PaperMenuHandler(javaPlugin, true);
         } else {
             this.menuHandler = new BukkitMenuHandler(javaPlugin, true);
@@ -906,7 +906,7 @@ public class QuickShop implements QuickShopAPI, Reloadable {
                     logger.error("Shop.display-items-check-ticks is too low! It may cause HUGE lag! Pick a number > 3000");
                 }
                 logger.info("Registering DisplayCheck task....");
-                folia.getImpl().runTimerAsync(()->{
+                folia.getImpl().runTimerAsync(() -> {
                     for (Shop shop : getShopManager().getLoadedShops()) {
                         //Shop may be deleted or unloaded when iterating
                         if (!shop.isLoaded()) {
@@ -1176,7 +1176,7 @@ public class QuickShop implements QuickShopAPI, Reloadable {
     }
 
     public AbstractItemStack<?> stack() {
-        if(PaperLib.isPaper()) {
+        if (PaperLib.isPaper()) {
             return new PaperItemStack();
         }
         return new BukkitItemStack();
@@ -1222,7 +1222,10 @@ public class QuickShop implements QuickShopAPI, Reloadable {
 
     public String getCommandPrefix(String commandLabel) {
         ConfigurationSection section = getConfig().getConfigurationSection("custom-subcommands");
-        return section == null ? commandLabel : section.getString(commandLabel);
+        if (section == null) return commandLabel;
+        String prefix = section.getString(commandLabel);
+        if (prefix == null || prefix.isEmpty()) return commandLabel;
+        return prefix;
     }
 
     public static class EconomyLoader {
