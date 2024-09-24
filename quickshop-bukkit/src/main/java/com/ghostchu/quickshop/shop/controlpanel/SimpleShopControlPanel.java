@@ -43,13 +43,13 @@ public class SimpleShopControlPanel implements ShopControlPanel {
             }
             components.add(text
                     .hoverEvent(HoverEvent.showText(plugin.text().of(sender, "controlpanel.setowner-hover").forLocale()))
-                    .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/quickshop transferownership ")));
+                    .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND, MsgUtil.fillArgs("/{0} {1} ", plugin.getMainCommand(), plugin.getCommandPrefix("transferownership")))));
         }
         // Unlimited
         if (plugin.perm().hasPermission(sender, "quickshop.unlimited")) {
             Component text = plugin.text().of(sender, "controlpanel.unlimited", MsgUtil.bool2String(shop.isUnlimited())).forLocale();
             Component hoverText = plugin.text().of(sender, "controlpanel.unlimited-hover").forLocale();
-            String clickCommand = MsgUtil.fillArgs("/quickshop silentunlimited {0}", shop.getRuntimeRandomUniqueId().toString());
+            String clickCommand = MsgUtil.fillArgs("/{0} {1} {2}", plugin.getMainCommand(), plugin.getCommandPrefix("silentunlimited"), shop.getRuntimeRandomUniqueId().toString());
             components.add(text
                     .hoverEvent(HoverEvent.showText(hoverText))
                     .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, clickCommand)));
@@ -60,7 +60,7 @@ public class SimpleShopControlPanel implements ShopControlPanel {
 
             final Component text = plugin.text().of(sender, "controlpanel.freeze").forLocale();
             final Component hoverText = plugin.text().of(sender, "controlpanel.freeze-hover").forLocale();
-            final String clickCommand = MsgUtil.fillArgs("/quickshop silentfreeze {0}", shop.getRuntimeRandomUniqueId().toString());
+            final String clickCommand = MsgUtil.fillArgs("/{0} {1} {2}", plugin.getMainCommand(), plugin.getCommandPrefix("silentfreeze"), shop.getRuntimeRandomUniqueId().toString());
             components.add(text
                     .hoverEvent(HoverEvent.showText(hoverText))
                     .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, clickCommand)));
@@ -74,14 +74,14 @@ public class SimpleShopControlPanel implements ShopControlPanel {
             if (shop.isSelling()) {
                 Component text = plugin.text().of(sender, "controlpanel.mode-selling").forLocale();
                 Component hoverText = plugin.text().of(sender, "controlpanel.mode-selling-hover").forLocale();
-                String clickCommand = MsgUtil.fillArgs("/quickshop silentbuy {0}", shop.getRuntimeRandomUniqueId().toString());
+                String clickCommand = MsgUtil.fillArgs("/{0} {1} {2}", plugin.getMainCommand(), plugin.getCommandPrefix("silentbuy"), shop.getRuntimeRandomUniqueId().toString());
                 components.add(text
                         .hoverEvent(HoverEvent.showText(hoverText))
                         .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, clickCommand)));
             } else if (shop.isBuying()) {
                 Component text = plugin.text().of(sender, "controlpanel.mode-buying").forLocale();
                 Component hoverText = plugin.text().of(sender, "controlpanel.mode-buying-hover").forLocale();
-                String clickCommand = MsgUtil.fillArgs("/quickshop silentsell {0}", shop.getRuntimeRandomUniqueId().toString());
+                String clickCommand = MsgUtil.fillArgs("/{0} {1} {2}", plugin.getMainCommand(), plugin.getCommandPrefix("silentsell"), shop.getRuntimeRandomUniqueId().toString());
                 components.add(text
                         .hoverEvent(HoverEvent.showText(hoverText))
                         .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, clickCommand)));
@@ -98,7 +98,7 @@ public class SimpleShopControlPanel implements ShopControlPanel {
                                     : Double.toString(shop.getPrice()))
             );
             Component hoverText = plugin.text().of(sender, "controlpanel.price-hover").forLocale();
-            String clickCommand = "/quickshop price ";
+            String clickCommand = MsgUtil.fillArgs("/{0} {1} ", plugin.getMainCommand(), plugin.getCommandPrefix("price"));
 
             components.add(text
                     .hoverEvent(HoverEvent.showText(hoverText))
@@ -111,7 +111,7 @@ public class SimpleShopControlPanel implements ShopControlPanel {
                             plugin.perm().hasPermission(sender, "quickshop.create.changeamount")) {
                 Component text = plugin.text().of(sender, "controlpanel.stack", shop.getItem().getAmount()).forLocale();
                 Component hoverText = plugin.text().of(sender, "controlpanel.stack-hover").forLocale();
-                String clickCommand = "/quickshop size ";
+                String clickCommand = MsgUtil.fillArgs("/{0} {1} ", plugin.getMainCommand(), plugin.getCommandPrefix("size"));
                 components.add(text
                         .hoverEvent(HoverEvent.showText(hoverText))
                         .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND, clickCommand)));
@@ -122,7 +122,7 @@ public class SimpleShopControlPanel implements ShopControlPanel {
             if (plugin.perm().hasPermission(sender, "quickshop.refill")) {
                 Component text = plugin.text().of(sender, "controlpanel.refill", shop.getPrice()).forLocale();
                 Component hoverText = plugin.text().of(sender, "controlpanel.refill-hover").forLocale();
-                String clickCommand = "/quickshop refill ";
+                String clickCommand = MsgUtil.fillArgs("/{0} {1} ", plugin.getMainCommand(), plugin.getCommandPrefix("refill"));
                 components.add(text
                         .hoverEvent(HoverEvent.showText(hoverText))
                         .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND, clickCommand)));
@@ -131,7 +131,7 @@ public class SimpleShopControlPanel implements ShopControlPanel {
             if (plugin.perm().hasPermission(sender, "quickshop.empty")) {
                 Component text = plugin.text().of(sender, "controlpanel.empty", shop.getPrice()).forLocale();
                 Component hoverText = plugin.text().of(sender, "controlpanel.empty-hover").forLocale();
-                String clickCommand = MsgUtil.fillArgs("/quickshop silentempty {0}", shop.getRuntimeRandomUniqueId().toString());
+                String clickCommand = MsgUtil.fillArgs("/{0} {1} {2}", plugin.getMainCommand(), plugin.getCommandPrefix("silentempty"), shop.getRuntimeRandomUniqueId().toString());
                 components.add(text
                         .hoverEvent(HoverEvent.showText(hoverText))
                         .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, clickCommand)));
@@ -144,18 +144,18 @@ public class SimpleShopControlPanel implements ShopControlPanel {
                 && plugin.isDisplayEnabled()) {
             Component text = plugin.text().of(sender, "controlpanel.toggledisplay", MsgUtil.bool2String(!shop.isDisableDisplay())).forLocale();
             Component hoverText = plugin.text().of(sender, "controlpanel.toggledisplay-hover").forLocale();
-            String clickCommand = MsgUtil.fillArgs("/quickshop silenttoggledisplay {0}", shop.getRuntimeRandomUniqueId().toString());
+            String clickCommand = MsgUtil.fillArgs("/{0} {1} {2}", plugin.getMainCommand(), plugin.getCommandPrefix("silenttoggledisplay"), shop.getRuntimeRandomUniqueId().toString());
             components.add(text
                     .hoverEvent(HoverEvent.showText(hoverText))
                     .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, clickCommand)));
         }
 
         // View purchase logs
-        if(plugin.perm().hasPermission(sender, "quickshop.other.history")
-                || (plugin.perm().hasPermission(sender, "quickshop.history") && shop.playerAuthorize(sender.getUniqueId(), BuiltInShopPermission.VIEW_PURCHASE_LOGS))){
+        if (plugin.perm().hasPermission(sender, "quickshop.other.history")
+                || (plugin.perm().hasPermission(sender, "quickshop.history") && shop.playerAuthorize(sender.getUniqueId(), BuiltInShopPermission.VIEW_PURCHASE_LOGS))) {
             Component text = plugin.text().of(sender, "controlpanel.history", MsgUtil.bool2String(!shop.isDisableDisplay())).forLocale();
             Component hoverText = plugin.text().of(sender, "controlpanel.history-hover").forLocale();
-            String clickCommand = MsgUtil.fillArgs("/quickshop silenthistory {0}", shop.getRuntimeRandomUniqueId().toString());
+            String clickCommand = MsgUtil.fillArgs("/{0} {1} {2}", plugin.getMainCommand(), plugin.getCommandPrefix("silenthistory"), shop.getRuntimeRandomUniqueId().toString());
             components.add(text
                     .hoverEvent(HoverEvent.showText(hoverText))
                     .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, clickCommand)));
@@ -167,7 +167,7 @@ public class SimpleShopControlPanel implements ShopControlPanel {
         if (plugin.perm().hasPermission(sender, "quickshop.other.destroy") || shop.playerAuthorize(sender.getUniqueId(), BuiltInShopPermission.DELETE)) {
             Component text = plugin.text().of(sender, "controlpanel.remove", shop.getPrice()).forLocale();
             Component hoverText = plugin.text().of(sender, "controlpanel.remove-hover").forLocale();
-            String clickCommand = MsgUtil.fillArgs("/quickshop silentremove {0}", shop.getRuntimeRandomUniqueId().toString());
+            String clickCommand = MsgUtil.fillArgs("/{0} {1} {2}", plugin.getMainCommand(), plugin.getCommandPrefix("silentremove"), shop.getRuntimeRandomUniqueId().toString());
             components.add(text
                     .hoverEvent(HoverEvent.showText(hoverText))
                     .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, clickCommand)));

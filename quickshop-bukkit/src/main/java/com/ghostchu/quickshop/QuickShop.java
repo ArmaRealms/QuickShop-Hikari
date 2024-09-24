@@ -1215,6 +1215,16 @@ public class QuickShop implements QuickShopAPI, Reloadable {
         H2
     }
 
+    public String getMainCommand() {
+        List<String> customCommands = getConfig().getStringList("custom-commands");
+        return customCommands.isEmpty() ? "quickshop" : customCommands.getFirst();
+    }
+
+    public String getCommandPrefix(String commandLabel) {
+        ConfigurationSection section = getConfig().getConfigurationSection("custom-subcommands");
+        return section == null ? commandLabel : section.getString(commandLabel);
+    }
+
     public static class EconomyLoader {
         private final QuickShop parent;
 

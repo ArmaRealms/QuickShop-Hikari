@@ -86,7 +86,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 
@@ -607,7 +606,7 @@ public class SimpleCommandManager implements CommandManager, TabCompleter, Comma
             Log.debug("Dupe subcommand registering: " + container);
             return;
         }
-        container.setPrefix(getCommandPrefix(container.getPrefix()));
+        container.setPrefix(plugin.getCommandPrefix(container.getPrefix()));
         container.bakeExecutorType();
         cmds.removeIf(commandContainer -> commandContainer.getPrefix().equalsIgnoreCase(container.getPrefix()));
         cmds.removeIf(container::equals);
@@ -645,11 +644,6 @@ public class SimpleCommandManager implements CommandManager, TabCompleter, Comma
     @Override
     public @NotNull String getTitle() {
         return "Command Manager";
-    }
-
-    public String getCommandPrefix(String commandLabel) {
-        Map<String, String> aliases = plugin.getConfig().getObject("custom-subcommands", Map.class, Map.of());
-        return aliases.getOrDefault(commandLabel, commandLabel);
     }
 
     @Override
