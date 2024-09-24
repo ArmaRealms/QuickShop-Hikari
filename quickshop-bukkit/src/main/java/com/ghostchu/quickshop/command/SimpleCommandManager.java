@@ -606,10 +606,15 @@ public class SimpleCommandManager implements CommandManager, TabCompleter, Comma
             Log.debug("Dupe subcommand registering: " + container);
             return;
         }
-        container.setPrefix(plugin.getCommandPrefix(container.getPrefix()));
         container.bakeExecutorType();
         cmds.removeIf(commandContainer -> commandContainer.getPrefix().equalsIgnoreCase(container.getPrefix()));
         cmds.removeIf(container::equals);
+        String oldPrefix = container.getPrefix();
+        String newPrefix = plugin.getCommandPrefix(oldPrefix);
+        if (newPrefix != null && !newPrefix.isEmpty()) {
+            container.setPrefix(newPrefix);
+            container.setDescription((locale) -> plugin.text().of("command.description." + oldPrefix).forLocale());
+        }
         cmds.add(container);
         cmds.sort(Comparator.comparing(CommandContainer::getPrefix));
         Log.debug(Level.INFO, "Registered subcommand: " + container.getPrefix() + " - " + container.getExecutor().getClass().getName(), Log.Caller.create());
