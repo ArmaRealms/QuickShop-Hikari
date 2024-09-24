@@ -5,6 +5,7 @@ import com.ghostchu.quickshop.api.command.CommandHandler;
 import com.ghostchu.quickshop.api.command.CommandParser;
 import com.ghostchu.quickshop.api.shop.Shop;
 import com.ghostchu.quickshop.util.ChatSheetPrinter;
+import com.ghostchu.quickshop.util.MsgUtil;
 import com.ghostchu.quickshop.util.Util;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -23,12 +24,12 @@ import java.util.UUID;
 import static com.ghostchu.quickshop.util.Util.getPlayerList;
 
 public class SubCommand_List implements CommandHandler<Player> {
-    private final QuickShop quickshop;
+    private final QuickShop plugin;
 
     private final int pageSize = 10;
 
-    public SubCommand_List(QuickShop quickshop) {
-        this.quickshop = quickshop;
+    public SubCommand_List(QuickShop plugin) {
+        this.plugin = plugin;
     }
 
     @Override
@@ -41,7 +42,7 @@ public class SubCommand_List implements CommandHandler<Player> {
         if (!StringUtils.isNumeric(parser.getArgs().get(0))) {
             if (parser.getArgs().size() >= 2) {
                 if (!StringUtils.isNumeric(parser.getArgs().get(1))) {
-                    quickshop.text().of(sender, "not-a-number", parser.getArgs().get(1)).send();
+                    plugin.text().of(sender, "not-a-number", parser.getArgs().get(1)).send();
                     return;
                 }
                 page = Integer.parseInt(parser.getArgs().get(2));
@@ -56,7 +57,7 @@ public class SubCommand_List implements CommandHandler<Player> {
     @Override
     public @Nullable List<String> onTabComplete(@NotNull Player sender, @NotNull String commandLabel, @NotNull CommandParser parser) {
         if (parser.getArgs().size() == 1) {
-            if (quickshop.perm().hasPermission(sender, "quickshopaddon.list.other")) {
+            if (plugin.perm().hasPermission(sender, "quickshopaddon.list.other")) {
                 return getPlayerList();
             }
         }
@@ -67,35 +68,35 @@ public class SubCommand_List implements CommandHandler<Player> {
     }
 
     private void lookupSelf(Player sender, int page) {
-        if (!quickshop.perm().hasPermission(sender, "quickshopaddon.list.self")) {
-            quickshop.text().of(sender, "no-permission").send();
+        if (!plugin.perm().hasPermission(sender, "quickshopaddon.list.self")) {
+            plugin.text().of(sender, "no-permission").send();
             return;
         }
         lookup(sender, sender.getUniqueId(), page);
     }
 
     private void lookupOther(@NotNull Player sender, @NotNull String userName, int page) {
-        if (!quickshop.perm().hasPermission(sender, "quickshopaddon.list.other")) {
-            quickshop.text().of(sender, "no-permission").send();
+        if (!plugin.perm().hasPermission(sender, "quickshopaddon.list.other")) {
+            plugin.text().of(sender, "no-permission").send();
             return;
         }
-        UUID targetUser = quickshop.getPlayerFinder().name2Uuid(userName);
+        UUID targetUser = plugin.getPlayerFinder().name2Uuid(userName);
         lookup(sender, targetUser, page);
     }
 
     private void lookup(@NotNull Player sender, @NotNull UUID lookupUser, int page) {
-        String name = quickshop.getPlayerFinder().uuid2Name(lookupUser);
+        String name = plugin.getPlayerFinder().uuid2Name(lookupUser);
         if (StringUtils.isEmpty(name)) {
             name = "Unknown";
         }
-        List<Shop> shops = quickshop.getShopManager().getAllShops(lookupUser);
+        List<Shop> shops = plugin.getShopManager().getAllShops(lookupUser);
         ChatSheetPrinter printer = new ChatSheetPrinter(sender);
 
         int startPos = (page - 1) * pageSize;
         int counter = 0;
         int loopCounter = 0;
         printer.printHeader();
-        printer.printLine(quickshop.text().of(sender, "addon.list.table-prefix-pageable", name, page, (int)Math.ceil((double)shops.size()/pageSize)).forLocale());
+        printer.printLine(plugin.text().of(sender, "addon.list.table-prefix-pageable", name, page, (int)Math.ceil((double)shops.size()/pageSize)).forLocale());
         for (Shop shop : shops) {
             counter++;
             if(counter < startPos) {
@@ -110,12 +111,12 @@ public class SubCommand_List implements CommandHandler<Player> {
             Component shopNameComponent = LegacyComponentSerializer.legacySection().deserialize(shopName).append(Component.textOfChildren(Component.text(" (").append(Util.getItemStackName(shop.getItem())).append(Component.text(")"))).color(NamedTextColor.GRAY));
             Component shopTypeComponent;
             if (shop.isBuying()) {
-                shopTypeComponent = quickshop.text().of(sender, "menu.this-shop-is-buying").forLocale();
+                shopTypeComponent = plugin.text().of(sender, "menu.this-shop-is-buying").forLocale();
             } else {
-                shopTypeComponent = quickshop.text().of(sender, "menu.this-shop-is-selling").forLocale();
+                shopTypeComponent = plugin.text().of(sender, "menu.this-shop-is-selling").forLocale();
             }
-            Component component = quickshop.text().of(sender, "addon.list.entry", counter, shopNameComponent, location.getWorld().getName(), location.getBlockX(), location.getBlockY(), location.getBlockZ(), quickshop.getEconomy().format(shop.getPrice(), shop.getLocation().getWorld(), shop.getCurrency()), shop.getShopStackingAmount(), Util.getItemStackName(shop.getItem()), shopTypeComponent).forLocale();
-            component = component.clickEvent(ClickEvent.runCommand("/quickshop silentpreview " + shop.getRuntimeRandomUniqueId()));
+            Component component = plugin.text().of(sender, "addon.list.entry", counter, shopNameComponent, location.getWorld().getName(), location.getBlockX(), location.getBlockY(), location.getBlockZ(), plugin.getEconomy().format(shop.getPrice(), shop.getLocation().getWorld(), shop.getCurrency()), shop.getShopStackingAmount(), Util.getItemStackName(shop.getItem()), shopTypeComponent).forLocale();
+            component = component.clickEvent(ClickEvent.runCommand(MsgUtil.fillArgs("/{0} {1} {2}", plugin.getMainCommand(), plugin.getCommandPrefix("silentpreview"), shop.getRuntimeRandomUniqueId().toString())));
             printer.printLine(component);
             loopCounter ++;
             if(loopCounter >= pageSize){
