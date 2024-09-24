@@ -31,18 +31,18 @@ public class SubCommand_Sign implements CommandHandler<Player> {
             plugin.text().of(sender, "not-looking-at-shop").send();
             return;
         }
-        if(!shop.playerAuthorize(sender.getUniqueId(), BuiltInShopPermission.SET_SIGN_TYPE) && ! plugin.perm().hasPermission(sender, "quickshop.other.sign")){
+        if (!shop.playerAuthorize(sender.getUniqueId(), BuiltInShopPermission.SET_SIGN_TYPE) && ! plugin.perm().hasPermission(sender, "quickshop.other.sign")){
             plugin.text().of(sender,"no-permission");
             return;
         }
 
         if (parser.getArgs().isEmpty()) {
-            plugin.text().of(sender, "no-sign-type-given", CommonUtil.list2String(getAvailableSignMaterials().stream().map(Enum::name).toList())).send();
+            plugin.text().of(sender, "no-sign-type-given", CommonUtil.list2String(getAvailableSignMaterials().stream().map(s -> s.name().toLowerCase()).toList())).send();
             return;
         }
         String signType = parser.getArgs().get(0);
-        Material material = Material.matchMaterial(signType.trim());
-        if(material == null || !Tag.WALL_SIGNS.isTagged(material)){
+        Material material = Material.matchMaterial(signType.trim().toUpperCase());
+        if (material == null || !Tag.WALL_SIGNS.isTagged(material)){
             plugin.text().of(sender,"sign-type-invalid", signType).send();
             return;
         }
@@ -61,7 +61,7 @@ public class SubCommand_Sign implements CommandHandler<Player> {
     @Override
     public List<String> onTabComplete(
             @NotNull Player sender, @NotNull String commandLabel, @NotNull CommandParser parser) {
-        return parser.getArgs().size() == 1 ? Tag.WALL_SIGNS.getValues().stream().map(Enum::name).toList() : Collections.emptyList();
+        return parser.getArgs().size() == 1 ? getAvailableSignMaterials().stream().map(s -> s.name().toLowerCase()).toList() : Collections.emptyList();
     }
 
 }
