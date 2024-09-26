@@ -28,6 +28,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,16 +59,16 @@ public final class Main extends CompatibilityModule implements Listener {
             // some other plugin registered a flag by the same name already.
             // you can use the existing flag, but this may cause conflicts - be sure to check type
             Flag<?> existing = registry.get("quickshophikari-create");
-            if (existing instanceof StateFlag createFlag) {
-                this.createFlag = createFlag;
+            if (existing instanceof StateFlag stateFlagCreate) {
+                this.createFlag = stateFlagCreate;
             } else {
                 getLogger().log(Level.WARNING, "Could not register flags! CONFLICT!", e);
                 Bukkit.getPluginManager().disablePlugin(this);
                 return;
             }
             existing = registry.get("quickshophikari-trade");
-            if (existing instanceof StateFlag tradeFlag) {
-                this.tradeFlag = tradeFlag;
+            if (existing instanceof StateFlag stateFlagTrade) {
+                this.tradeFlag = stateFlagTrade;
             } else {
                 getLogger().log(Level.WARNING, "Could not register flags! CONFLICT!", e);
                 Bukkit.getPluginManager().disablePlugin(this);
@@ -85,10 +86,14 @@ public final class Main extends CompatibilityModule implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void permissionOverride(ShopAuthorizeCalculateEvent event) {
+    public void permissionOverride(@NotNull ShopAuthorizeCalculateEvent event) {
         Location shopLoc = event.getShop().getLocation();
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-        RegionManager manager = container.get(BukkitAdapter.adapt(shopLoc.getWorld()));
+        World world = shopLoc.getWorld();
+        if (world == null) {
+            return;
+        }
+        RegionManager manager = container.get(BukkitAdapter.adapt(world));
         if (manager == null) {
             return;
         }
@@ -103,7 +108,7 @@ public final class Main extends CompatibilityModule implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void preCreation(ShopPreCreateEvent event) {
+    public void preCreation(@NotNull ShopPreCreateEvent event) {
         event.getCreator().getBukkitPlayer().ifPresent(player -> {
             LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
             RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
@@ -116,7 +121,7 @@ public final class Main extends CompatibilityModule implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void preCreation(ShopCreateEvent event) {
+    public void preCreation(@NotNull ShopCreateEvent event) {
         event.getCreator().getBukkitPlayer().ifPresent(player -> {
             LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
             RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
@@ -136,13 +141,13 @@ public final class Main extends CompatibilityModule implements Listener {
         });
     }
 
-    private Map<Location, Shop> getRegionShops(ProtectedRegion region, World world) {
+    private @NotNull Map<Location, Shop> getRegionShops(@NotNull ProtectedRegion region, World world) {
         BlockVector3 minPoint = region.getMinimumPoint();
         BlockVector3 maxPoint = region.getMaximumPoint();
         Set<Chunk> chuckLocations = new HashSet<>();
 
-        for (int x = minPoint.getBlockX(); x <= maxPoint.getBlockX() + 16; x += 16) {
-            for (int z = minPoint.getBlockZ(); z <= maxPoint.getBlockZ() + 16; z += 16) {
+        for (int x = minPoint.x(); x <= maxPoint.x() + 16; x += 16) {
+            for (int z = minPoint.z(); z <= maxPoint.z() + 16; z += 16) {
                 chuckLocations.add(world.getChunkAt(x >> 4, z >> 4));
             }
         }
@@ -159,7 +164,7 @@ public final class Main extends CompatibilityModule implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void preCreation(ShopPurchaseEvent event) {
+    public void preCreation(@NotNull ShopPurchaseEvent event) {
         event.getPurchaser().getBukkitPlayer().ifPresent(player -> {
             LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
             RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();

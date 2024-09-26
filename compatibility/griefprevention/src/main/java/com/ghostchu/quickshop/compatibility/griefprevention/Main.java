@@ -29,6 +29,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,6 +60,7 @@ public final class Main extends CompatibilityModule implements Listener {
         this.tradeLimits.addAll(toFlags(getConfig().getStringList("trade")));
         this.griefPrevention = (GriefPrevention) Bukkit.getPluginManager().getPlugin("GriefPrevention");
         Log.debug("GPCompat: Started up");
+
         try {
             getLogger().info("Registering unsafe event listener...");
             Bukkit.getPluginManager().registerEvents(new Listener() {
@@ -303,8 +305,11 @@ public final class Main extends CompatibilityModule implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onTrading(ShopPurchaseEvent event) {
+    public void onTrading(@NotNull ShopPurchaseEvent event) {
         event.getPurchaser().getBukkitPlayer().ifPresent(p -> {
+            if (tradeLimits.isEmpty()) {
+                return;
+            }
             if (checkPermission(p, event.getShop().getLocation(), tradeLimits)) {
                 return;
             }
@@ -313,7 +318,7 @@ public final class Main extends CompatibilityModule implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void permissionOverride(ShopAuthorizeCalculateEvent event) {
+    public void permissionOverride(@NotNull ShopAuthorizeCalculateEvent event) {
         Log.debug("GP-Compat: Starting override permission...");
         Location shopLoc = event.getShop().getLocation();
         if (!griefPrevention.claimsEnabledForWorld(shopLoc.getWorld())) {
@@ -370,7 +375,7 @@ public final class Main extends CompatibilityModule implements Listener {
             }
         };
 
-        public static Flag getFlag(String flag) {
+        public static @Nullable Flag getFlag(String flag) {
             for (Flag value : Flag.values()) {
                 if (value.name().equalsIgnoreCase(flag)) {
                     return value;
