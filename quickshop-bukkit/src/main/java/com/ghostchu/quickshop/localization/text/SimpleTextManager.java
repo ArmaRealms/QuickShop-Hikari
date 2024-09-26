@@ -29,6 +29,7 @@ import lombok.SneakyThrows;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -62,6 +63,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.UUID;
@@ -202,33 +204,38 @@ public class SimpleTextManager implements TextManager, Reloadable, SubPasteItem 
         File configFile = new File(plugin.getDataFolder(), "color-scheme.yml");
         if (!configFile.exists()) {
             try {
-                Files.copy(plugin.getJavaPlugin().getResource("color-scheme.yml"), configFile.toPath());
+                Files.copy(Objects.requireNonNull(plugin.getJavaPlugin().getResource("color-scheme.yml")), configFile.toPath());
             } catch (IOException e) {
                 plugin.logger().warn("Failed to copy color-scheme.yml to plugin folder!", e);
             }
         }
+
         FileConfiguration colorSchemeYaml = YamlConfiguration.loadConfiguration(configFile);
         ConfigurationSection colorSchemeSection = colorSchemeYaml.getConfigurationSection("color-scheme");
-        if (colorSchemeSection == null) {
-            tagResolvers = new TagResolver[0];
-            return;
-        }
+
         List<TagResolver> resolvers = new ArrayList<>();
         resolvers.add(TagResolver.standard());
-        resolvers.add(TagResolver.resolver("color_scheme", (argumentQueue, context) -> {
-            if (!argumentQueue.hasNext()) {
-                return null;
-            }
-            Tag.Argument argument = argumentQueue.pop();
-            String code = argument.value();
-            String hex = colorSchemeSection.getString(code, "#ffffff");
-            TextColor textColor = TextColor.fromHexString(hex);
-            if (textColor == null) {
-                return null;
-            }
-            Log.debug("Registered color scheme " + code + " with hex " + hex);
-            return Tag.styling(textColor);
-        }));
+
+        if (colorSchemeSection != null) {
+            resolvers.add(TagResolver.resolver("color_scheme", (argumentQueue, context) -> {
+                if (!argumentQueue.hasNext()) {
+                    return null;
+                }
+                Tag.Argument argument = argumentQueue.pop();
+                String code = argument.value();
+                String hex = colorSchemeSection.getString(code, "#ffffff");
+                TextColor textColor = TextColor.fromHexString(hex);
+                if (textColor == null) {
+                    return null;
+                }
+                Log.debug("Registered color scheme " + code + " with hex " + hex);
+                return Tag.styling(textColor);
+            }));
+        }
+
+        String prefix = colorSchemeYaml.getString("prefix", "<dark_gray>[<lime>[Loja]</dark_gray><reset>");
+        resolvers.add(TagResolver.resolver("prefix", (argumentQueue, context) -> Tag.inserting(MiniMessage.miniMessage().deserialize(prefix))));
+
         this.tagResolvers = resolvers.toArray(new TagResolver[0]);
     }
 
