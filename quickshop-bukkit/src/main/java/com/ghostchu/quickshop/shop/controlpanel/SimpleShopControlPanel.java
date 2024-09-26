@@ -54,11 +54,14 @@ public class SimpleShopControlPanel implements ShopControlPanel {
                     .hoverEvent(HoverEvent.showText(hoverText))
                     .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, clickCommand)));
         }
+
+        // Freeze
         if (plugin.perm().hasPermission(sender, "quickshop.other.freeze")
                 || (plugin.perm().hasPermission(sender, "quickshop.togglefreeze")
                 && shop.playerAuthorize(sender.getUniqueId(), BuiltInShopPermission.SET_SHOPTYPE))) {
 
-            final Component text = plugin.text().of(sender, "controlpanel.freeze").forLocale();
+            String path = shop.isFrozen() ? "controlpanel.unfreeze" : "controlpanel.freeze";
+            final Component text = plugin.text().of(sender, path).forLocale();
             final Component hoverText = plugin.text().of(sender, "controlpanel.freeze-hover").forLocale();
             final String clickCommand = MsgUtil.fillArgs("/{0} {1} {2}", plugin.getMainCommand(), plugin.getCommandPrefix("silentfreeze"), shop.getRuntimeRandomUniqueId().toString());
             components.add(text
