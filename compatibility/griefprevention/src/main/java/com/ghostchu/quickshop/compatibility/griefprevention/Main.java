@@ -29,6 +29,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,6 +60,7 @@ public final class Main extends CompatibilityModule implements Listener {
         this.tradeLimits.addAll(toFlags(getConfig().getStringList("trade")));
         this.griefPrevention = (GriefPrevention) Bukkit.getPluginManager().getPlugin("GriefPrevention");
         Log.debug("GPCompat: Started up");
+
         try {
             getLogger().info("Registering unsafe event listener...");
             Bukkit.getPluginManager().registerEvents(new Listener() {
@@ -84,7 +86,7 @@ public final class Main extends CompatibilityModule implements Listener {
         }
     }
 
-    private List<Flag> toFlags(List<String> flags) {
+    private @NotNull List<Flag> toFlags(@NotNull List<String> flags) {
         List<Flag> result = new ArrayList<>(3);
         for (String flagStr : flags) {
             Flag flag = Flag.getFlag(flagStr);
@@ -105,7 +107,7 @@ public final class Main extends CompatibilityModule implements Listener {
     }
 
     // If it is the main claim, then we will delete all the shops that were inside of it.
-    private void handleMainClaimUnclaimedOrExpired(Claim claim, String logMessage) {
+    private void handleMainClaimUnclaimedOrExpired(@NotNull Claim claim, String logMessage) {
         for (Chunk chunk : claim.getChunks()) {
             Map<Location, Shop> shops = getApi().getShopManager().getShops(chunk);
             if (shops != null) {
@@ -122,7 +124,7 @@ public final class Main extends CompatibilityModule implements Listener {
 
     // If it is a main claim, then we will remove the shops if the main claim was resized (size was decreased).
     // A shop will be removed if the old claim contains it but the new claim doesn't.
-    private void handleMainClaimResized(Claim oldClaim, Claim newClaim) {
+    private void handleMainClaimResized(@NotNull Claim oldClaim, Claim newClaim) {
         for (Chunk chunk : oldClaim.getChunks()) {
             Map<Location, Shop> shops = getApi().getShopManager().getShops(chunk);
             if (shops != null) {
@@ -146,7 +148,7 @@ public final class Main extends CompatibilityModule implements Listener {
         handleSubClaimResizedHelper(newClaim, oldClaim);
     }
 
-    private void handleSubClaimResizedHelper(Claim claimVerifyChunks, Claim claimVerifyShop) {
+    private void handleSubClaimResizedHelper(@NotNull Claim claimVerifyChunks, Claim claimVerifyShop) {
         for (Chunk chunk : claimVerifyChunks.getChunks()) {
             Map<Location, Shop> shops = getApi().getShopManager().getShops(chunk);
             if (shops != null) {
@@ -182,7 +184,7 @@ public final class Main extends CompatibilityModule implements Listener {
     }
 
     // Helper to the Claim Trust Changed Event Handler (to avoid duplicate code above)
-    private void handleClaimTrustChanged(Claim claim, TrustChangedEvent event) {
+    private void handleClaimTrustChanged(Claim claim, @NotNull TrustChangedEvent event) {
         if (event.isGiven()) {
             return;
         }
@@ -225,7 +227,7 @@ public final class Main extends CompatibilityModule implements Listener {
 
     // If it is a subclaim, then we will not remove the shops of the main claim owner.
     // But we will remove all the others.
-    private void handleSubClaimUnclaimed(Claim subClaim) {
+    private void handleSubClaimUnclaimed(@NotNull Claim subClaim) {
         for (Chunk chunk : subClaim.getChunks()) {
             Map<Location, Shop> shops = getApi().getShopManager().getShops(chunk);
             if (shops != null) {
@@ -241,9 +243,9 @@ public final class Main extends CompatibilityModule implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onCreation(ShopCreateEvent event) {
-        event.getCreator().getBukkitPlayer().ifPresent(p -> {
-            if (checkPermission(p, event.getShop().getLocation(), Collections.singletonList(createLimit))) {
+    public void onCreation(@NotNull ShopCreateEvent event) {
+        event.getCreator().getBukkitPlayer().ifPresent(player -> {
+            if (checkPermission(player, event.getShop().getLocation(), Collections.singletonList(createLimit))) {
                 return;
             }
             event.setCancelled(true, getApi().getTextManager().of(event.getCreator(), "addon.griefprevention.creation-denied").forLocale());
@@ -251,6 +253,9 @@ public final class Main extends CompatibilityModule implements Listener {
     }
 
     private boolean checkPermission(@NotNull Player player, @NotNull Location location, List<Flag> limits) {
+        if (player.hasPermission("griefprevention.ignoreclaims")) {
+            return true;
+        }
         if (!griefPrevention.claimsEnabledForWorld(location.getWorld())) {
             return true;
         }
@@ -267,9 +272,9 @@ public final class Main extends CompatibilityModule implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPreCreation(ShopPreCreateEvent event) {
-        event.getCreator().getBukkitPlayer().ifPresent(p -> {
-            if (checkPermission(p, event.getLocation(), Collections.singletonList(createLimit))) {
+    public void onPreCreation(@NotNull ShopPreCreateEvent event) {
+        event.getCreator().getBukkitPlayer().ifPresent(player -> {
+            if (checkPermission(player, event.getLocation(), Collections.singletonList(createLimit))) {
                 return;
             }
             event.setCancelled(true, getApi().getTextManager().of(event.getCreator(), "addon.griefprevention.creation-denied").forLocale());
@@ -303,9 +308,12 @@ public final class Main extends CompatibilityModule implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onTrading(ShopPurchaseEvent event) {
-        event.getPurchaser().getBukkitPlayer().ifPresent(p -> {
-            if (checkPermission(p, event.getShop().getLocation(), tradeLimits)) {
+    public void onTrading(@NotNull ShopPurchaseEvent event) {
+        event.getPurchaser().getBukkitPlayer().ifPresent(player -> {
+            if (tradeLimits.isEmpty()) {
+                return;
+            }
+            if (checkPermission(player, event.getShop().getLocation(), tradeLimits)) {
                 return;
             }
             event.setCancelled(true, getApi().getTextManager().of(event.getPurchaser(), "addon.griefprevention.trade-denied").forLocale());
@@ -313,11 +321,12 @@ public final class Main extends CompatibilityModule implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void permissionOverride(ShopAuthorizeCalculateEvent event) {
+    public void permissionOverride(@NotNull ShopAuthorizeCalculateEvent event) {
         Log.debug("GP-Compat: Starting override permission...");
         Location shopLoc = event.getShop().getLocation();
         if (!griefPrevention.claimsEnabledForWorld(shopLoc.getWorld())) {
-            Log.debug("GP-Compat: World " + shopLoc.getWorld().getName() + " not enabled for claims");
+            String worldName = shopLoc.getWorld() == null ? "Null World" : shopLoc.getWorld().getName();
+            Log.debug("GP-Compat: World " + worldName + " not enabled for claims");
             return;
         }
         Claim claim = griefPrevention.dataStore.getClaimAt(shopLoc, false, false, null);
@@ -370,7 +379,7 @@ public final class Main extends CompatibilityModule implements Listener {
             }
         };
 
-        public static Flag getFlag(String flag) {
+        public static @Nullable Flag getFlag(String flag) {
             for (Flag value : Flag.values()) {
                 if (value.name().equalsIgnoreCase(flag)) {
                     return value;
