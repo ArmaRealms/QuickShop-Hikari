@@ -5,11 +5,11 @@ import lombok.Getter;
 /**
  * Throw when no permission provider founded.
  */
+@Getter
 public class ProviderIsEmptyException extends RuntimeException {
-    @Getter
     private final String providerName;
 
-    public ProviderIsEmptyException(String providerName) {
+    public ProviderIsEmptyException(final String providerName) {
         this.providerName = providerName;
     }
 }

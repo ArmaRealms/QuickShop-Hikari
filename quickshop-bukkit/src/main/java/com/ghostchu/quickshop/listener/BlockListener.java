@@ -52,7 +52,7 @@ public class BlockListener extends AbstractProtectionListener {
      * Removes chests when they're destroyed.
      */
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onBreak(BlockBreakEvent e) {
+    public void onBreak(final BlockBreakEvent e) {
         final Block b = e.getBlock();
         final Player p = e.getPlayer();
         // If the shop was a chest
@@ -75,7 +75,7 @@ public class BlockListener extends AbstractProtectionListener {
                     return;
                 }
                 e.setCancelled(true);
-                Component component = Util.getItemStackName(new ItemStack(Material.GOLDEN_AXE, 1));
+                final Component component = Util.getItemStackName(new ItemStack(Material.GOLDEN_AXE, 1));
                 plugin.text().of(p, "no-creative-break", component).send();
                 return;
             }
@@ -112,7 +112,7 @@ public class BlockListener extends AbstractProtectionListener {
                     return;
                 }
                 e.setCancelled(true);
-                Component component = Util.getItemStackName(new ItemStack(Material.GOLDEN_AXE, 1));
+                final Component component = Util.getItemStackName(new ItemStack(Material.GOLDEN_AXE, 1));
                 plugin.text().of(p, "no-creative-break", component).send();
                 return;
             }
@@ -132,7 +132,7 @@ public class BlockListener extends AbstractProtectionListener {
      * @return The shop
      */
     @Nullable
-    private Shop getShopNextTo(@NotNull Location loc) {
+    private Shop getShopNextTo(@NotNull final Location loc) {
         final Block b = Util.getAttached(loc.getBlock());
         // Util.getAttached(b)
         if (b == null) {
@@ -142,12 +142,12 @@ public class BlockListener extends AbstractProtectionListener {
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    public void onInventoryMove(InventoryMoveItemEvent event) {
+    public void onInventoryMove(final InventoryMoveItemEvent event) {
         if (!this.updateSignWhenInventoryMoving) {
             return;
         }
 
-        if(event.getInitiator().getHolder() instanceof Player player) {
+        if(event.getInitiator().getHolder() instanceof final Player player) {
             if(!QuickShop.inShop.contains(player.getUniqueId())) {
                 return;
             }
@@ -177,7 +177,7 @@ public class BlockListener extends AbstractProtectionListener {
      * Listens for chest placement, so a doublechest shop can't be created.
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
-    public void onPlace(BlockPlaceEvent e) {
+    public void onPlace(final BlockPlaceEvent e) {
 
         final Material type = e.getBlock().getType();
         final Block placingBlock = e.getBlock();
@@ -199,7 +199,7 @@ public class BlockListener extends AbstractProtectionListener {
         } else {
             //Get all chest in vertical Location
             final BlockFace placingChestFacing = ((Directional) (placingBlock.getBlockData())).getFacing();
-            for (BlockFace face : Util.getVerticalFacing()) {
+            for (final BlockFace face : Util.getVerticalFacing()) {
                 //just check the right side and left side
                 if (!face.equals(placingChestFacing) && !face.equals(placingChestFacing.getOppositeFace())) {
                     final Block nearByBlock = placingBlock.getRelative(face);
@@ -242,7 +242,7 @@ public class BlockListener extends AbstractProtectionListener {
      * Listens for sign update to prevent other plugin or Purpur to edit the sign
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
-    public void onSignUpdate(SignChangeEvent event) {
+    public void onSignUpdate(final SignChangeEvent event) {
         final Block posShopBlock = Util.getAttached(event.getBlock());
         if (posShopBlock == null) {
             return;
@@ -265,7 +265,7 @@ public class BlockListener extends AbstractProtectionListener {
      * Listens for sign update to prevent other plugin or Purpur to edit the sign
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
-    public void onPlayerSignOpen(PlayerSignOpenEvent event) {
+    public void onPlayerSignOpen(final PlayerSignOpenEvent event) {
         final Block posShopBlock = Util.getAttached(event.getSign().getBlock());
         if (posShopBlock == null) return;
 

@@ -46,20 +46,20 @@ public final class Main extends CompatibilityModule implements Listener {
     @Override
     public void onLoad() {
         saveDefaultConfig();
-        FlagRegistry registry = WorldGuard.getInstance().getFlagRegistry();
+        final FlagRegistry registry = WorldGuard.getInstance().getFlagRegistry();
         try {
             // create a flag with the name "my-custom-flag", defaulting to true
-            StateFlag createFlag = new StateFlag("quickshophikari-create", getConfig().getBoolean("create.default-allow", false));
-            StateFlag tradeFlag = new StateFlag("quickshophikari-trade", getConfig().getBoolean("trade.default-allow", true));
+            final StateFlag createFlag = new StateFlag("quickshophikari-create", getConfig().getBoolean("create.default-allow", false));
+            final StateFlag tradeFlag = new StateFlag("quickshophikari-trade", getConfig().getBoolean("trade.default-allow", true));
             registry.register(createFlag);
             registry.register(tradeFlag);
             this.createFlag = createFlag;
             this.tradeFlag = tradeFlag;
-        } catch (FlagConflictException e) {
+        } catch (final FlagConflictException e) {
             // some other plugin registered a flag by the same name already.
             // you can use the existing flag, but this may cause conflicts - be sure to check type
             Flag<?> existing = registry.get("quickshophikari-create");
-            if (existing instanceof StateFlag stateFlagCreate) {
+            if (existing instanceof final StateFlag stateFlagCreate) {
                 this.createFlag = stateFlagCreate;
             } else {
                 getLogger().log(Level.WARNING, "Could not register flags! CONFLICT!", e);
@@ -67,7 +67,7 @@ public final class Main extends CompatibilityModule implements Listener {
                 return;
             }
             existing = registry.get("quickshophikari-trade");
-            if (existing instanceof StateFlag stateFlagTrade) {
+            if (existing instanceof final StateFlag stateFlagTrade) {
                 this.tradeFlag = stateFlagTrade;
             } else {
                 getLogger().log(Level.WARNING, "Could not register flags! CONFLICT!", e);
@@ -86,19 +86,19 @@ public final class Main extends CompatibilityModule implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void permissionOverride(@NotNull ShopAuthorizeCalculateEvent event) {
-        Location shopLoc = event.getShop().getLocation();
-        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-        World world = shopLoc.getWorld();
+    public void permissionOverride(@NotNull final ShopAuthorizeCalculateEvent event) {
+        final Location shopLoc = event.getShop().getLocation();
+        final RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+        final World world = shopLoc.getWorld();
         if (world == null) {
             return;
         }
-        RegionManager manager = container.get(BukkitAdapter.adapt(world));
+        final RegionManager manager = container.get(BukkitAdapter.adapt(world));
         if (manager == null) {
             return;
         }
-        ApplicableRegionSet set = manager.getApplicableRegions(BlockVector3.at(shopLoc.getX(), shopLoc.getY(), shopLoc.getZ()));
-        for (ProtectedRegion region : set.getRegions()) {
+        final ApplicableRegionSet set = manager.getApplicableRegions(BlockVector3.at(shopLoc.getX(), shopLoc.getY(), shopLoc.getZ()));
+        for (final ProtectedRegion region : set.getRegions()) {
             if (region.getOwners().contains(event.getAuthorizer())) {
                 if (event.getNamespace().equals(QuickShop.getInstance().getJavaPlugin()) && event.getPermission().equals(BuiltInShopPermission.DELETE.getRawNode())) {
                     event.setResult(true);
@@ -108,11 +108,11 @@ public final class Main extends CompatibilityModule implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void preCreation(@NotNull ShopPreCreateEvent event) {
+    public void preCreation(@NotNull final ShopPreCreateEvent event) {
         event.getCreator().getBukkitPlayer().ifPresent(player -> {
-            LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
-            RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-            RegionQuery query = container.createQuery();
+            final LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+            final RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+            final RegionQuery query = container.createQuery();
             if (!query.testState(BukkitAdapter.adapt(event.getLocation()), localPlayer, this.createFlag)) {
                 event.setCancelled(true, getApi().getTextManager().of(event.getCreator(), "addon.worldguard.creation-flag-test-failed").forLocale());
             }
@@ -121,17 +121,17 @@ public final class Main extends CompatibilityModule implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void preCreation(@NotNull ShopCreateEvent event) {
+    public void preCreation(@NotNull final ShopCreateEvent event) {
         event.getCreator().getBukkitPlayer().ifPresent(player -> {
-            LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
-            RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-            RegionQuery query = container.createQuery();
+            final LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+            final RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+            final RegionQuery query = container.createQuery();
             if (!query.testState(BukkitAdapter.adapt(event.getShop().getLocation()), localPlayer, this.createFlag)) {
                 event.setCancelled(true, getApi().getTextManager().of(event.getCreator(), "addon.worldguard.creation-flag-test-failed").forLocale());
                 return;
             }
-            Set<ProtectedRegion> regions = container.createQuery().getApplicableRegions(BukkitAdapter.adapt(event.getShop().getLocation())).getRegions();
-            List<Shop> shops = new ArrayList<>();
+            final Set<ProtectedRegion> regions = container.createQuery().getApplicableRegions(BukkitAdapter.adapt(event.getShop().getLocation())).getRegions();
+            final List<Shop> shops = new ArrayList<>();
             regions.forEach(r -> shops.addAll(getRegionShops(r, event.getShop().getLocation().getWorld()).values()));
             if (limitPerRegion > 0) {
                 if (shops.size() + 1 > limitPerRegion) {
@@ -141,10 +141,10 @@ public final class Main extends CompatibilityModule implements Listener {
         });
     }
 
-    private @NotNull Map<Location, Shop> getRegionShops(@NotNull ProtectedRegion region, World world) {
-        BlockVector3 minPoint = region.getMinimumPoint();
-        BlockVector3 maxPoint = region.getMaximumPoint();
-        Set<Chunk> chuckLocations = new HashSet<>();
+    private @NotNull Map<Location, Shop> getRegionShops(@NotNull final ProtectedRegion region, final World world) {
+        final BlockVector3 minPoint = region.getMinimumPoint();
+        final BlockVector3 maxPoint = region.getMaximumPoint();
+        final Set<Chunk> chuckLocations = new HashSet<>();
 
         for (int x = minPoint.x(); x <= maxPoint.x() + 16; x += 16) {
             for (int z = minPoint.z(); z <= maxPoint.z() + 16; z += 16) {
@@ -152,10 +152,10 @@ public final class Main extends CompatibilityModule implements Listener {
             }
         }
 
-        Map<Location, Shop> shopMap = new HashMap<>();
+        final Map<Location, Shop> shopMap = new HashMap<>();
 
-        for (Chunk chunk : chuckLocations) {
-            Map<Location, Shop> shopsInChunk = getApi().getShopManager().getShops(chunk);
+        for (final Chunk chunk : chuckLocations) {
+            final Map<Location, Shop> shopsInChunk = getApi().getShopManager().getShops(chunk);
             if (shopsInChunk != null) {
                 shopMap.putAll(shopsInChunk);
             }
@@ -164,11 +164,11 @@ public final class Main extends CompatibilityModule implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void preCreation(@NotNull ShopPurchaseEvent event) {
+    public void preCreation(@NotNull final ShopPurchaseEvent event) {
         event.getPurchaser().getBukkitPlayer().ifPresent(player -> {
-            LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
-            RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-            RegionQuery query = container.createQuery();
+            final LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+            final RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+            final RegionQuery query = container.createQuery();
             if (!query.testState(BukkitAdapter.adapt(event.getShop().getLocation()), localPlayer, this.tradeFlag)) {
                 event.setCancelled(true, getApi().getTextManager().of(event.getPurchaser(), "addon.worldguard.trade-flag-test-failed").forLocale());
             }

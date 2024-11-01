@@ -20,13 +20,13 @@ public class SubCommand_Sign implements CommandHandler<Player> {
 
     private final QuickShop plugin;
 
-    public SubCommand_Sign(QuickShop plugin) {
+    public SubCommand_Sign(final QuickShop plugin) {
         this.plugin = plugin;
     }
 
     @Override
-    public void onCommand(@NotNull Player sender, @NotNull String commandLabel, @NotNull CommandParser parser) {
-        Shop shop = getLookingShop(sender);
+    public void onCommand(@NotNull final Player sender, @NotNull final String commandLabel, @NotNull final CommandParser parser) {
+        final Shop shop = getLookingShop(sender);
         if (shop == null) {
             plugin.text().of(sender, "not-looking-at-shop").send();
             return;
@@ -40,13 +40,13 @@ public class SubCommand_Sign implements CommandHandler<Player> {
             plugin.text().of(sender, "no-sign-type-given", CommonUtil.list2String(getAvailableSignMaterials().stream().map(s -> s.name().toLowerCase()).toList())).send();
             return;
         }
-        String signType = parser.getArgs().get(0);
-        Material material = Material.matchMaterial(signType.trim().toUpperCase());
+        final String signType = parser.getArgs().get(0);
+        final Material material = Material.matchMaterial(signType.trim().toUpperCase());
         if (material == null || !Tag.WALL_SIGNS.isTagged(material)){
             plugin.text().of(sender,"sign-type-invalid", signType).send();
             return;
         }
-        for (Sign sign : shop.getSigns()) {
+        for (final Sign sign : shop.getSigns()) {
             plugin.getShopManager().makeShopSign(shop.getLocation().getBlock(), sign.getBlock(), material);
             shop.claimShopSign(sign);
         }
@@ -60,7 +60,7 @@ public class SubCommand_Sign implements CommandHandler<Player> {
     @NotNull
     @Override
     public List<String> onTabComplete(
-            @NotNull Player sender, @NotNull String commandLabel, @NotNull CommandParser parser) {
+            @NotNull final Player sender, @NotNull final String commandLabel, @NotNull final CommandParser parser) {
         return parser.getArgs().size() == 1 ? getAvailableSignMaterials().stream().map(s -> s.name().toLowerCase()).toList() : Collections.emptyList();
     }
 
